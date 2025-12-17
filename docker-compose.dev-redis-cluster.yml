@@ -14,6 +14,9 @@ services:
       - 127.0.0.1:9000:9000
     depends_on:
       - postgres
+    networks:
+      - default
+      - shared_network
 
   minio:
     image: cgr.dev/chainguard/minio
@@ -34,6 +37,9 @@ services:
       timeout: 5s
       retries: 5
       start_period: 1s
+    networks:
+      - default
+      - shared_network
 
   postgres:
     image: docker.io/postgres:${POSTGRES_VERSION:-17}
@@ -54,6 +60,9 @@ services:
       - 127.0.0.1:5432:5432
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - shared_network
 
   # Redis Cluster. Requires a Unix host to work for network_mode: host. I.e. tests will fail on windows and mac with this setup.
   redis-node-0:
@@ -146,3 +155,9 @@ volumes:
     driver: local
   redis-cluster_data-5:
     driver: local
+
+networks:
+  default:
+    driver: bridge
+  shared_network:
+    external: true

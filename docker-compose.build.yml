@@ -16,6 +16,9 @@ services:
         condition: service_healthy
     ports:
       - "3000:3000"
+    networks:
+      - default
+      - shared_network
     environment: &langfuse-web-env
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
       NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-mysecret}
@@ -52,6 +55,7 @@ services:
       REDIS_TLS_CA: ${REDIS_TLS_CA:-/certs/ca.crt}
       REDIS_TLS_CERT: ${REDIS_TLS_CERT:-/certs/redis.crt}
       REDIS_TLS_KEY: ${REDIS_TLS_KEY:-/certs/redis.key}
+      HOSTNAME: 0.0.0.0
     restart: always
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3000/api/public/health"]
@@ -68,6 +72,9 @@ services:
     depends_on: *langfuse-depends-on
     ports:
       - "3030:3030"
+    networks:
+      - default
+      - shared_network
     environment:
       <<: *langfuse-web-env
     restart: always
@@ -90,6 +97,9 @@ services:
     ports:
       - "8123:8123"
       - "9000:9000"
+    networks:
+      - default
+      - shared_network
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
@@ -110,6 +120,9 @@ services:
       - "9091:9001"
     volumes:
       - langfuse_minio_data:/data
+    networks:
+      - default
+      - shared_network
     healthcheck:
       test: ["CMD", "mc", "ready", "local"]
       interval: 1s
@@ -125,6 +138,9 @@ services:
       --maxmemory-policy noeviction
     ports:
       - 6379:6379
+    networks:
+      - default
+      - shared_network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 3s
@@ -149,6 +165,9 @@ services:
       - 5432:5432
     volumes:
       - langfuse_postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
+      - shared_network
 
 volumes:
   langfuse_postgres_data:
@@ -159,3 +178,9 @@ volumes:
     driver: local
   langfuse_minio_data:
     driver: local
+
+networks:
+  default:
+    driver: bridge
+  shared_network:
+    external: true

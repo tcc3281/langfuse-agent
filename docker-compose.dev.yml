@@ -19,6 +19,7 @@ services:
       - postgres
     networks:
       - default
+      - shared_network
 
   minio:
     image: cgr.dev/chainguard/minio
@@ -42,6 +43,7 @@ services:
       start_period: 1s
     networks:
       - default
+      - shared_network
 
   redis:
     image: docker.io/redis:7.2.4
@@ -54,6 +56,7 @@ services:
       - ${HOST_IP:-127.0.0.1}:${REDIS_HOST_PORT:-6379}:6379
     networks:
       - default
+      - shared_network
 
   postgres:
     image: docker.io/postgres:${POSTGRES_VERSION:-17}
@@ -77,6 +80,7 @@ services:
       - langfuse_postgres_data:/var/lib/postgresql/data
     networks:
       - default
+      - shared_network
 
 volumes:
   langfuse_postgres_data:
@@ -96,3 +100,5 @@ networks:
   default:
     name: ${DOCKER_NETWORK_NAME:-langfuse-network}
     driver: bridge
+  shared_network:
+    external: true
